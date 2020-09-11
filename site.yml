@@ -1,0 +1,25 @@
+---
+- hosts: example
+  become: yes
+  gather_facts: no
+
+  pre_tasks:
+    - name: Wait connection
+      wait_for_connection:
+
+    - name: Gather facts for first time
+      setup:
+
+    - name: Wait for yum unlock
+      shell: ps -aux | grep yum
+      register: yum_lock
+      retries: 20
+      delay: 10
+      until: yum_lock.stdout_lines|length <= 2
+      changed_when: false
+      when:
+        - ansible_os_family == 'RedHat'
+
+  roles:
+    - docker
+...
